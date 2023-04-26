@@ -30,14 +30,17 @@ export const translateApi = createApi({
         },
     }),
     endpoints: (builder) => ({
-        translateText: builder.mutation<TranslationResponse, string>({
-            query: (text) => ({
+        translateText: builder.mutation<
+            TranslationResponse,
+            TranslateParamsType
+        >({
+            query: (params) => ({
                 url: '/api/v3/translate',
                 method: 'POST',
                 body: new URLSearchParams({
                     from: 'en',
-                    to: 'ru',
-                    text: text,
+                    to: params.to,
+                    text: params.text,
                 }),
             }),
         }),
