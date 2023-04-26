@@ -15,7 +15,7 @@ const Hero = () => {
                     type='button'
                     onClick={() =>
                         window.open(
-                            'https://github.com/TidbitsJS/Summize',
+                            'https://github.com/pablosukaban/ai-summarizer',
                             '_blank'
                         )
                     }

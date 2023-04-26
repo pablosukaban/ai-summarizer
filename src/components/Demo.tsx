@@ -4,13 +4,12 @@ import { articleApi } from '../services/articleApi';
 import LinkIcon from '../assets/link.svg';
 import CopyIcon from '../assets/copy.svg';
 import LoaderIcon from '../assets/loader.svg';
+import TickIcon from '../assets/tick.svg';
 
 type ArticleType = {
     url: string;
     summary: string;
 };
-
-const testUrl = 'https://www.jsmastery.pro/';
 
 const Demo = () => {
     const [article, setArticle] = useState<ArticleType>({
@@ -19,6 +18,7 @@ const Demo = () => {
     });
 
     const [allArticles, setAllArticles] = useState<ArticleType[]>([]);
+    const [copied, setCopied] = useState('');
 
     const [trigger, { error, isFetching }] =
         articleApi.useLazyGetSummaryQuery();
@@ -44,6 +44,17 @@ const Demo = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setArticle((prev) => ({ ...prev, url: e.target.value }));
+    };
+
+    const handleCopy = (copyUrl: string) => {
+        setCopied(copyUrl);
+        navigator.clipboard.writeText(copyUrl);
+
+        setTimeout(() => setCopied(''), 3000);
+    };
+
+    const handleArticleClick = (givenArticle: ArticleType) => {
+        setArticle(givenArticle);
     };
 
     useEffect(() => {
@@ -85,19 +96,25 @@ const Demo = () => {
                 </form>
                 <div className='flex max-h-60 flex-col gap-1 overflow-y-auto'>
                     {allArticles.map((article, index) => (
-                        <div
-                            key={`link-${index}`}
-                            onClick={() => setArticle(article)}
-                            className='link_card'
-                        >
-                            <div className='copy_btn'>
+                        <div key={`link-${index}`} className='link_card'>
+                            <div
+                                className='copy_btn'
+                                onClick={() => handleCopy(article.url)}
+                            >
                                 <img
-                                    src={CopyIcon}
+                                    src={
+                                        copied === article.url
+                                            ? TickIcon
+                                            : CopyIcon
+                                    }
                                     alt='copy_icon'
                                     className='h-[40%] w-[40%] object-contain'
                                 />
                             </div>
-                            <p className='flex-1 truncate font-satoshi text-sm font-medium text-blue-700'>
+                            <p
+                                className='flex-1 truncate font-satoshi text-sm font-medium text-blue-700'
+                                onClick={() => handleArticleClick(article)}
+                            >
                                 {article.url}
                             </p>
                         </div>
