@@ -3,7 +3,10 @@ import Logo from '../assets/logo.svg';
 
 const Hero = () => {
     return (
-        <header className='flex w-full flex-col items-center justify-center'>
+        <header
+            className='flex w-full flex-col items-center justify-center'
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
             <nav className='mb-10 flex w-full items-center justify-between pt-3'>
                 <img
                     src={Logo}

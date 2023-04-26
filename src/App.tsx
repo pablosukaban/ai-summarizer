@@ -4,7 +4,7 @@ import Demo from './components/Demo';
 
 const App = () => {
     return (
-        <main>
+        <main onClick={(e: React.MouseEvent) => e.stopPropagation()}>
             <div className='main'>
                 <div className='gradient' />
             </div>
