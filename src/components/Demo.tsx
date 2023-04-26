@@ -38,8 +38,6 @@ const Demo = () => {
 
             localStorage.setItem('articles', JSON.stringify(updatedArticles));
         }
-
-        // setArticle((prev) => ({ ...prev, url: '' }));
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +53,11 @@ const Demo = () => {
 
     const handleArticleClick = (givenArticle: ArticleType) => {
         setArticle(givenArticle);
+    };
+
+    const handleClearHistory = () => {
+        setAllArticles([]);
+        localStorage.setItem('articles', '[]');
     };
 
     useEffect(() => {
@@ -94,6 +97,12 @@ const Demo = () => {
                         <p>↵</p>
                     </button>
                 </form>
+                <span
+                    className='my-2 cursor-pointer self-end text-sm text-gray-400 transition hover:text-gray-500'
+                    onClick={handleClearHistory}
+                >
+                    Очистить историю
+                </span>
                 <div className='flex max-h-60 flex-col gap-1 overflow-y-auto'>
                     {allArticles.map((article, index) => (
                         <div key={`link-${index}`} className='link_card'>
