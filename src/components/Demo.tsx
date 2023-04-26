@@ -5,6 +5,7 @@ import LinkIcon from '../assets/link.svg';
 import CopyIcon from '../assets/copy.svg';
 import LoaderIcon from '../assets/loader.svg';
 import TickIcon from '../assets/tick.svg';
+import { translateApi } from '../services/translateApi';
 
 type ArticleType = {
     url: string;
@@ -20,24 +21,36 @@ const Demo = () => {
     const [allArticles, setAllArticles] = useState<ArticleType[]>([]);
     const [copied, setCopied] = useState('');
 
-    const [trigger, { error, isFetching }] =
+    const [articleTrigger, { error: articleError, isFetching }] =
         articleApi.useLazyGetSummaryQuery();
+
+    // const [translateTrigger] = translateApi.useLazyGetTranslationQuery();
+    // const [makeTranslation] = translateApi.useGetTranslationMutation();
+    const [
+        translateSummary,
+        { data: translatedSummary, error: translateError },
+    ] = translateApi.useTranslateTextMutation();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const { data } = await trigger({ length: 3, url: article.url });
+        const { data: articleData } = await articleTrigger({
+            length: 1,
+            url: article.url,
+        });
 
-        if (data?.summary) {
-            const newArticle = { ...article, summary: data.summary };
+        if (!articleData?.summary) return;
 
-            const updatedArticles = [newArticle, ...allArticles];
+        const newArticle = { ...article, summary: articleData.summary };
 
-            setArticle(newArticle);
-            setAllArticles(updatedArticles);
+        const updatedArticles = [newArticle, ...allArticles];
 
-            localStorage.setItem('articles', JSON.stringify(updatedArticles));
-        }
+        setArticle(newArticle);
+        setAllArticles(updatedArticles);
+
+        localStorage.setItem('articles', JSON.stringify(updatedArticles));
+
+        translateSummary(article.summary);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +72,12 @@ const Demo = () => {
         setAllArticles([]);
         localStorage.setItem('articles', '[]');
     };
+
+    // const handleTranslate = () => {
+    //     translateSummary('Hello there and welcome');
+    // };
+
+    // console.log(translateError);
 
     useEffect(() => {
         const articlesFromLocalStorage = JSON.parse(
@@ -138,12 +157,12 @@ const Demo = () => {
                         alt='loader'
                         className='h-20 w-20 object-contain'
                     />
-                ) : error ? (
+                ) : articleError ? (
                     <p className='text-center font-inter font-bold text-black'>
                         Что-то пошло не так...
                         <br />
                         <span className='font-satoshi font-normal text-gray-700'>
-                            {'status' in error && error.status}
+                            {'status' in articleError && articleError.status}
                         </span>
                     </p>
                 ) : (
@@ -153,8 +172,19 @@ const Demo = () => {
                                 <span className='blue_gradient'>Резюме</span>{' '}
                                 статьи
                             </h2>
-                            <div className='summary_box'>
+                            <div className='summary_box space-y-8'>
                                 <p>{article.summary}</p>
+                                <hr />
+                                <p>
+                                    {translatedSummary?.ok
+                                        ? translatedSummary.translated_text
+                                        : ''}
+
+                                    {translateError &&
+                                    'message' in translateError
+                                        ? translateError.message
+                                        : ''}
+                                </p>
                             </div>
                         </div>
                     )

@@ -2,11 +2,11 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const BASE_URL = 'https://article-extractor-and-summarizer.p.rapidapi.com/';
 
-export type ResponseType = {
+export type ArticleResponseType = {
     summary: string;
 };
 
-export type ParamsType = {
+export type ArticleParamsType = {
     url: string;
     length: number;
 };
@@ -27,7 +27,7 @@ export const articleApi = createApi({
         },
     }),
     endpoints: (builder) => ({
-        getSummary: builder.query<ResponseType, ParamsType>({
+        getSummary: builder.query<ArticleResponseType, ArticleParamsType>({
             query: (params) =>
                 `/summarize?url=${encodeURIComponent(params.url)}&length=${
                     params.length
