@@ -12,9 +12,22 @@ type ArticleType = {
     summary: string;
 };
 
-type TranslatedTextType = {
-    text: string;
-    language: string;
+// type TranslatedTextType = {
+//     text: string;
+//     language: string;
+// };
+
+const ErrorComponent = ({ errorStatus }: { errorStatus: number }) => {
+    if (errorStatus === 503) {
+        return (
+            <span className='font-satoshi font-normal text-gray-700'>
+                Не удалось извлечь корпус текста со страницы. Убедитесь, что вы
+                пытаетесь обобщить новостную статью или другую страницу с четко
+                определенными блоками текста.
+            </span>
+        );
+    }
+    return <></>;
 };
 
 const Demo = () => {
@@ -25,16 +38,17 @@ const Demo = () => {
     const [allArticles, setAllArticles] = useState<ArticleType[]>([]);
     const [copied, setCopied] = useState('');
 
-    // const [translatedText, setTranslatedText] = useState(article.summary);
     const [currentLanguage, setCurrentLanguage] = useState('en');
 
-    const [articleTrigger, { error: articleError, isFetching }] =
-        articleApi.useLazyGetSummaryQuery();
+    const [
+        articleTrigger,
+        { error: articleError, isFetching: isArticleFetching },
+    ] = articleApi.useLazyGetSummaryQuery();
 
-    // const [translateTrigger] = translateApi.useLazyGetTranslationQuery();
-    // const [makeTranslation] = translateApi.useGetTranslationMutation();
-    const [translateSummary, { data: translatedText, isLoading }] =
-        translateApi.useTranslateTextMutation();
+    const [
+        translateSummary,
+        { data: translatedText, isLoading: isTranslationLoading },
+    ] = translateApi.useTranslateTextMutation();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -77,12 +91,6 @@ const Demo = () => {
         setAllArticles([]);
         localStorage.setItem('articles', '[]');
     };
-
-    // const handleTranslate = () => {
-    //     translateSummary('Hello there and welcome');
-    // };
-
-    // console.log(translateError);
 
     const handleChangeCurrentLanguage = (
         e: React.ChangeEvent<HTMLSelectElement>
@@ -168,7 +176,7 @@ const Demo = () => {
             </div>
 
             <div className='my-10 flex max-w-full items-center justify-center'>
-                {isFetching ? (
+                {isArticleFetching || isTranslationLoading ? (
                     <img
                         src={LoaderIcon}
                         alt='loader'
@@ -178,36 +186,30 @@ const Demo = () => {
                     <p className='text-center font-inter font-bold text-black'>
                         Что-то пошло не так...
                         <br />
-                        <span className='font-satoshi font-normal text-gray-700'>
-                            {'status' in articleError && articleError.status}
-                        </span>
+                        {'status' in articleError && (
+                            <ErrorComponent
+                                errorStatus={+articleError.status}
+                            />
+                        )}
                     </p>
                 ) : (
                     article.summary && (
                         <div className='flex flex-col gap-3'>
-                            <h2 className='font-satoshi text-xl font-bold text-gray-600'>
-                                <span className='blue_gradient'>Резюме</span>{' '}
-                                статьи
-                            </h2>
-                            <div className='summary_box space-y-8'>
-                                <p>{article.summary}</p>
-                            </div>
-                            {/* ======= */}
-
                             <div className='flex justify-between'>
                                 <h2 className='font-satoshi text-xl font-bold text-gray-600'>
-                                    Нужен
                                     <span className='blue_gradient'>
-                                        {' '}
-                                        перевод{' '}
+                                        Резюме
                                     </span>{' '}
-                                    ? Выберите нужный язык
+                                    статьи
                                 </h2>
                                 <select
                                     onChange={handleChangeCurrentLanguage}
                                     value={currentLanguage}
-                                    className='cursor-pointer rounded border bg-transparent px-2 py-1 text-gray-500 outline-none transition focus:border-black focus:text-black '
+                                    className='cursor-pointer rounded border bg-transparent px-2 py-1 text-gray-500 outline-none transition hover:border-gray-500 focus:border-black focus:text-black '
                                 >
+                                    <option disabled={true}>
+                                        Выберите язык
+                                    </option>
                                     <option value='en'>English</option>
                                     <option value='ru'>Русский</option>
                                     <option value='es'>Espanol</option>
@@ -216,21 +218,11 @@ const Demo = () => {
                                 </select>
                             </div>
                             <div className='summary_box space-y-8'>
-                                {currentLanguage === 'en' ? (
-                                    article.summary
-                                ) : isLoading ? (
-                                    <img
-                                        src={LoaderIcon}
-                                        alt='loader'
-                                        className='h-20 w-20 object-contain'
-                                    />
-                                ) : (
-                                    <p>
-                                        {translatedText?.ok
-                                            ? translatedText.translated_text
-                                            : ''}
-                                    </p>
-                                )}
+                                <p>
+                                    {currentLanguage === 'en'
+                                        ? article.summary
+                                        : translatedText?.translated_text}
+                                </p>
                             </div>
                         </div>
                     )
