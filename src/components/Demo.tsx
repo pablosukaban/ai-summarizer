@@ -12,11 +12,6 @@ type ArticleType = {
     summary: string;
 };
 
-// type TranslatedTextType = {
-//     text: string;
-//     language: string;
-// };
-
 const ErrorComponent = ({ errorStatus }: { errorStatus: number }) => {
     if (errorStatus === 503) {
         return (
